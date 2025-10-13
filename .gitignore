@@ -1,0 +1,32 @@
+# Build and binary artifacts
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Object files and executables
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+*.lib
+
+# IDE / Editor / System files
+.vscode/
+.idea/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.db
+*.log
+.vs/
+
+
+# macOS / Windows junk
+.DS_Store
+Thumbs.db
