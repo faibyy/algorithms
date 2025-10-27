@@ -36,7 +36,7 @@ public:
 template <typename T>
 HalftoneImage<T>::HalftoneImage(size_t width, size_t height, bool autofill) : width(width), height(height) {
 	if (width == 0 || height == 0) {
-		throw std::invalid_argument("Dimesions can not be zero.");
+		throw std::invalid_argument("Dimensions must be positive.");
 	}
 
 	data = new T[width * height];
@@ -134,7 +134,7 @@ bool HalftoneImage<T>::operator!=(const HalftoneImage& src) const {
 template <typename T>
 T& HalftoneImage<T>::operator()(size_t row, size_t column) {
 	if (row >= height || column >= width) {
-		throw std::out_of_range("One of indexes or both are out of range.");
+		throw std::out_of_range("Index out of range.");
 	}
 
 	return data[row * width + column];
@@ -143,7 +143,7 @@ T& HalftoneImage<T>::operator()(size_t row, size_t column) {
 template <typename T>
 const T& HalftoneImage<T>::operator()(size_t row, size_t column) const {
 	if (row >= height || column >= width) {
-		throw std::out_of_range("One of indexes or both are out of range.");
+		throw std::out_of_range("Index out of range.");
 	}
 
 	return data[row * width + column];
@@ -161,10 +161,11 @@ HalftoneImage<T> HalftoneImage<T>::operator+(const T& scalar) const {
 			result.data[i] = data[i] + scalar;
 		}
 		else {
-			if (scalar > 0 && data[i] > std::numeric_limits<T>::max() - scalar) {
+			long long result_value = static_cast<long long>(data[i]) + static_cast<long long>(scalar);
+			if (result_value > std::numeric_limits<T>::max()) {
 				result.data[i] = std::numeric_limits<T>::max();
 			}
-			else if (scalar < 0 && data[i] < std::numeric_limits<T>::min() - scalar) {
+			else if (result_value < std::numeric_limits<T>::min()) {
 				result.data[i] = std::numeric_limits<T>::min();
 			}
 			else {
@@ -189,7 +190,6 @@ HalftoneImage<T> HalftoneImage<T>::operator*(const T& scalar) const {
 		}
 		else {
 			long long result_value = static_cast<long long>(data[i]) * static_cast<long long>(scalar);
-
 			if (result_value > std::numeric_limits<T>::max()) {
 				result.data[i] = std::numeric_limits<T>::max();
 			}
@@ -228,18 +228,22 @@ HalftoneImage<T> HalftoneImage<T>::operator+(const HalftoneImage<T>& src) const 
 			if constexpr (std::is_same_v<T, bool>) {
 				result(row, column) = value1 || value2;
 			}
-			else if (std::is_same_v<T, float>) {
+			else if constexpr(std::is_same_v<T, float>) {
 				result(row, column) = value1 + value2;
 			}
 			else {
-				if (value1 > 0 && value2 > std::numeric_limits<T>::max() - value1) {
+				long long result_value = static_cast<long long>(value1) + static_cast<long long>(value2);
+				if (result_value > std::numeric_limits<T>::max()) {
 					result(row, column) = std::numeric_limits<T>::max();
 				}
-				else if (value1 < 0 && value2 < std::numeric_limits<T>::min() - value1) {
-					result(row, column) = std::numeric_limits<T>::min();
-				}
 				else {
-					result(row, column) = value1 + value2;
+					if (result_value < std::numeric_limits<T>::min())
+					{
+						result(row, column) = std::numeric_limits<T>::min();
+					}
+					else {
+						result(row, column) = value1 + value2;
+					}
 				}
 			}
 		}
@@ -251,7 +255,7 @@ HalftoneImage<T> HalftoneImage<T>::operator+(const HalftoneImage<T>& src) const 
 template <typename T>
 HalftoneImage<T> HalftoneImage<T>::operator*(const HalftoneImage<T>& src) const {
 	if (width != src.width || height != src.height) {
-		throw std::invalid_argument("Image demensions must be the same.");
+		throw std::invalid_argument("Images must have the same dimensions.");
 	}
 
 	HalftoneImage<T> result(width, height);
@@ -291,7 +295,14 @@ HalftoneImage<T> HalftoneImage<T>::operator!() const {
 			result.data[i] = !data[i];
 		}
 		else {
-			result.data[i] = -data[i];
+			if (data[i] == std::numeric_limits<T>::min())
+			{
+				result.data[i] = -(data[i] + 1);
+			}
+			else
+			{
+				result.data[i] = -data[i];
+			}
 		}
 	}
 
@@ -348,5 +359,16 @@ std::ostream& operator<<(std::ostream& ostream, const HalftoneImage<T>& src) {
 		ostream << "\n";
 	}
 	return ostream;
+}
+
+template <typename T>
+void flip_image_180(HalftoneImage<T>& image) {
+	HalftoneImage<T> rotated_image(image.get_width(), image.get_height());
+	for (size_t i = 0; i < image.get_height(); ++i) {
+		for (size_t j = 0; j < image.get_width(); ++j) {
+			rotated_image(i, j) = image(image.get_width() - i - 1, image.get_height() - j - 1);
+		}
+	}
+	image = rotated_image;
 }
 #endif
