@@ -5,10 +5,11 @@
 #include <random>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
 template<typename T>
 class LinkedList {
-private:
+public:
 	struct Node {
 		T data;
 		Node* prev;
@@ -18,6 +19,7 @@ private:
 			: data(val), prev(p), next(n) {
 		}
 	};
+private:
 	Node* head;
 	size_t size_;
 
@@ -50,8 +52,10 @@ private:
 public:
 
 	size_t get_size() const { return size_; }
-
 	bool is_empty() const { return size_ == 0; }
+	Node* get_head_node() { return head; }
+	const Node* get_head_node() const { return head; }
+	void set_head_node(Node* newHead) { head = newHead; }
 
 	LinkedList() : head(nullptr), size_(0) {}
 
@@ -235,11 +239,27 @@ public:
 			os << current->data;
 			current = current->next;
 			if (current != list.head) {
-				os << " <-> ";
+				os << ' ';
 			}
 		} while (current != list.head);
 		os << "]";
 		return os;
 	}
 };
+
+template <typename T>
+void reverse_list(LinkedList<T>& list) {
+	if (list.is_empty() || list.get_size() == 1) {
+		return;
+	}
+	typename LinkedList<T>::Node* current = list.get_head_node();
+	typename LinkedList<T>::Node* original_head = current;
+	typename LinkedList<T>::Node* new_head = original_head->prev;
+	do {
+		std::swap(current->prev, current->next);
+		current = current->next;
+	} while (current != original_head);
+	list.set_head_node(new_head);
+}
+
 #endif
