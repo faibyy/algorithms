@@ -371,4 +371,7 @@ void flip_image_180(HalftoneImage<T>& image) {
 	}
 	image = rotated_image;
 }
+
+
+
 #endif

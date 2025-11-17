@@ -13,7 +13,10 @@ int main() {
             std::cout << "img1 == img2" << std::endl;
         }
 
+        std::cout << img2(0, 1) << '\n';
         img2(0, 1) = 10;
+        std::cout << img2(0, 1);
+
         if (img1 != img2) {
             std::cout << "img2(1,2)=10; img2 != img1" << std::endl;
             std::cout << "New img2:\n" << img2 << std::endl;
@@ -35,7 +38,7 @@ int main() {
         std::cout << "img4(2,4)+img5(4,2)=sum_result(4,4):\n" << sum_result << std::endl;
         std::cout << "Fill factor of img5: " << img1.get_fill_factor() << std::endl;
 
-        HalftoneImage<short> task_img(5, 5, true);
+        HalftoneImage<short> task_img(6, 6, true);
         std::cout << "\n--- task solution ---" << std::endl;
         std::cout << "Original image:\n" << task_img << std::endl;
         flip_image_180(task_img);
